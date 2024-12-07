@@ -18,6 +18,7 @@ const settings = {
   BONUS: process.env.BONUS ? parseInt(process.env.BONUS) : 50,
   ID_MAIN_GUILD: process.env.ID_MAIN_GUILD ? process.env.ID_MAIN_GUILD : "21dffe24-6e74-4642-8189-87e9be6b8366",
   DELAY_BETWEEN_REQUESTS: process.env.DELAY_BETWEEN_REQUESTS && _isArray(process.env.DELAY_BETWEEN_REQUESTS) ? JSON.parse(process.env.DELAY_BETWEEN_REQUESTS) : [1, 5],
+  DELAY_BETWEEN_GAME: process.env.DELAY_BETWEEN_GAME && _isArray(process.env.DELAY_BETWEEN_GAME) ? JSON.parse(process.env.DELAY_BETWEEN_GAME) : [5, 10],
   DELAY_START_BOT: process.env.DELAY_START_BOT && _isArray(process.env.DELAY_START_BOT) ? JSON.parse(process.env.DELAY_START_BOT) : [1, 15],
   DELAY_MINI_GAME_EGG: process.env.DELAY_MINI_GAME_EGG && _isArray(process.env.DELAY_MINI_GAME_EGG) ? JSON.parse(process.env.DELAY_MINI_GAME_EGG) : [3, 5],
 };

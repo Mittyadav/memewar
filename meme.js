@@ -166,20 +166,16 @@ class MemesWar {
   }
 
   async createGuild(telegramInitData, userInfoResult) {
-    const url = "https://memes-war.memecore.com/api/raid";
+    const url = "https://memes-war.memecore.com/api/guild";
     const avatarPath = path.join(__dirname, "/images/avatar.jpg");
-
-    // const thumbnailBuffer = fs.readFileSync(avatarPath);
-    // const thumbnailBase64 = thumbnailBuffer.toString("base64");
-    // const image = await Jimp.read(avatarPath);
-    // const thumbnailBase64 = image.getBuffer();
-    // console.log(image);
 
     const formData = new FormData();
     const imageBuffer = fs.readFileSync(avatarPath);
     formData.append("thumbnail", imageBuffer, {
       filename: "avatar.jpg",
       contentType: "image/jpeg",
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
     formData.append("name", userInfoResult.nickname);
     formData.append("ticker", userInfoResult.nickname);
@@ -194,11 +190,13 @@ class MemesWar {
     // const data = {
     //   name: userInfoResult.nickname,
     //   ticker: userInfoResult.nickname,
-    //   thumbnail: "",
+    //   thumbnail: imageBuffer,
     // };
 
     try {
       const response = await axios.post(url, formData, { headers });
+      // const response = await axios.postForm(url, data, { headers });
+
       if (response.status === 200 && response.data.data) {
         const { name } = response.data.data;
         this.log(`Created guild ${name} success!`, "success");
@@ -261,7 +259,7 @@ class MemesWar {
         if (isWin) {
           this.log(`You win! | Receive coin: ${moveWarbond} | Receive portion ${warbondPortion} `, "success");
         } else {
-          this.log(`You lost! | Lose coin: ${moveWarbond} | Lose portion ${warbondPortion} `, "warning");
+          this.log(`You lose! | Lose coin: ${moveWarbond} | Lose portion ${warbondPortion} `, "warning");
         }
         await sleep(2);
         return { success: true, data: response.data.data };
@@ -339,8 +337,8 @@ class MemesWar {
 
   async processGames(telegramInitData, guildId) {
     let amount = 0;
-    try {
-      while (amount < settings.AMOUNT_ATTACK) {
+    while (amount < settings.AMOUNT_ATTACK) {
+      try {
         const guildStatus = await this.checkGuildStatus(telegramInitData, guildId);
         await sleep(2);
         if (guildStatus.success) {
@@ -355,16 +353,16 @@ class MemesWar {
           await sleep(2);
           if (target.success) {
             this.log(`Starting attack ${target.data.name} | rank:${target.data.warbondRank}...`);
-            await sleep(5);
+            await sleep(settings.DELAY_BETWEEN_GAME);
             await this.playGame(telegramInitData, target.data);
           } else {
             this.log(`Can't not find target: ${target.error}...`, "warning");
           }
         }
-        amount++;
+      } catch (error) {
+        return { success: false, error: error.message };
       }
-    } catch (error) {
-      return { success: false, error: error.message };
+      amount++;
     }
   }
 
@@ -490,13 +488,14 @@ class MemesWar {
       const TARGET_GUILD_ID = settings.ID_MAIN_GUILD !== settings.GUILD_BONUS ? [settings.GUILD_BONUS, settings.ID_MAIN_GUILD] : [settings.ID_MAIN_GUILD];
       const listGuilds = [...TARGET_GUILD_ID];
       let bonus = Math.floor(Math.min(100, settings.BONUS));
-      bonus = bonus < 5 ? 5 : bonus;
+
+      bonus = bonus < 80 ? 80 : bonus;
       const MIN_WARBOND_THRESHOLD = 1000;
       let initWarbondTokens = parseInt(userInfoResult.data.warbondTokens);
       let warbondTokens = initWarbondTokens;
 
       const { guildId } = userInfoResult.data;
-      if (guildId && !listGuilds.includes(guildId) && !settings.TRANSFER_WARBOND_TO_MAIN_GUILD) listGuilds.push(guildId);
+      if (guildId && !listGuilds.includes(guildId) && !settings.TRANSFER_WARBOND_TO_MAIN_GUILD) listGuilds.unshift(guildId);
       // console.log(userInfoResult, listGuilds);
       for (const elementGuildID of listGuilds) {
         await sleep(2);
@@ -518,8 +517,12 @@ class MemesWar {
           }
 
           if (warbondTokens < MIN_WARBOND_THRESHOLD) continue;
-        } else if (guildStatus?.data?.warbondTokens < 200000 && elementGuildID !== settings.GUILD_BONUS) {
-          // warbondTokens = 200000;
+        } else if (guildStatus?.data?.warbondTokens < 2000000 && elementGuildID !== settings.GUILD_BONUS) {
+          warbondTokens = Math.round(warbondTokens * (Math.max(20, 100 - bonus) / 100));
+          const remainder = warbondTokens % 1000;
+          if (remainder !== 0) {
+            warbondTokens += 1000 - remainder;
+          }
         }
 
         const favoriteGuilds = await this.checkFavoriteGuilds(telegramInitData);
@@ -540,7 +543,6 @@ class MemesWar {
           this.log(`Unable to transfer $War.Bond: ${transferResult.error}`, "error");
         }
       }
-      process.exit(0);
     } catch (error) {
       this.log(`Error: ${error.message}`, "error");
     }
@@ -570,15 +572,24 @@ class MemesWar {
     }
   }
 
-  async submitQuestProgress(telegramInitData, questType, questId) {
-    const url = `https://memes-war.memecore.com/api/quest/${questType}/${questId}/progress`;
+  async submitQuestProgress(telegramInitData, questType, task, status) {
+    const { id: questId } = task;
+    let url = `https://memes-war.memecore.com/api/quest/${questType}/${questId}/claim`;
+    if (status === "GO") {
+      url = `https://memes-war.memecore.com/api/quest/${questType}/${questId}/visit`;
+    } else if (status === "VERIFY") {
+      url = `https://memes-war.memecore.com/api/quest/${questType}/${questId}/verify`;
+    } else if (status === "DONE") {
+      return;
+    }
+
     const headers = {
       ...this.headers,
       cookie: `telegramInitData=${telegramInitData}`,
     };
 
     try {
-      const response = await axios.post(url, {}, { headers });
+      const response = await axios.post(url, null, { headers });
       if (response.status === 200 && response.data.data) {
         return { success: true, data: response.data.data };
       } else {
@@ -596,35 +607,43 @@ class MemesWar {
       return;
     }
 
-    const pendingQuests = questsResult.data.filter((quest) => !settings.SKIP_TASKS.includes(quest.id) && quest.status === "GO");
+    const pendingQuests = questsResult.data.filter((quest) => !settings.SKIP_TASKS.includes(quest.id) && quest.status !== "DONE" && quest.status !== "IN_PROGRESS");
     if (pendingQuests.length === 0) {
       this.log("No quests to complete", "warning");
       return;
     }
 
     for (const quest of pendingQuests) {
+      let status = quest.status;
+      await sleep(1);
       this.log(`Completing quest ${quest.title}`, "info");
+      let result = await this.submitQuestProgress(telegramInitData, quest.questType, quest, status);
+      // console.log(quest, result, "1");
+      if (quest.status === "CLAIM") {
+        // continue;
+      } else {
+        if (!result.success || result.data.status !== "VERIFY") {
+          this.log(`Unable to complete GO quest ${quest.id} | ${quest.title}: ${result.error || "Invalid status"}`, "error");
+          continue;
+        }
+        await sleep(3);
+        status = "VERIFY";
+        result = await this.submitQuestProgress(telegramInitData, quest.questType, quest, status);
+        // console.log(status, "2");
+        if (!result.success || result.data.status !== "CLAIM") {
+          this.log(`Unable to complete VERIFY quest ${quest.id} | ${quest.title}: ${result.error || "Invalid status"}`, "error");
+          continue;
+        }
 
-      let result = await this.submitQuestProgress(telegramInitData, quest.questType, quest.id);
-      if (!result.success || result.data.status !== "VERIFY") {
-        this.log(`Unable to complete quest ${quest.title}: ${result.error || "Invalid status"}`, "error");
-        continue;
-      }
+        await sleep(3);
+        status = "CLAIM";
+        result = await this.submitQuestProgress(telegramInitData, quest.questType, quest, status);
+        // console.log(status, "3");
 
-      await sleep(3);
-
-      result = await this.submitQuestProgress(telegramInitData, quest.questType, quest.id);
-      if (!result.success || result.data.status !== "CLAIM") {
-        this.log(`Unable to complete quest ${quest.title}: ${result.error || "Invalid status"}`, "error");
-        continue;
-      }
-
-      await sleep(3);
-
-      result = await this.submitQuestProgress(telegramInitData, quest.questType, quest.id);
-      if (!result.success || result.data.status !== "DONE") {
-        this.log(`Unable to complete quest ${quest.title}: ${result.error || "Invalid status"}`, "error");
-        continue;
+        if (!result.success || result.data.status !== "DONE") {
+          this.log(`Unable to complete CLAIM quest ${quest.id} |  ${quest.title}: ${result.error || "Invalid status"}`, "error");
+          continue;
+        }
       }
 
       const rewards = result.data.rewards
@@ -675,9 +694,9 @@ class MemesWar {
             await this.processQuests(telegramInitData);
           }
 
-          // if (!guildId) {
-          //   await this.createGuild(telegramInitData, userInfoResult.data);
-          // }
+          if (!guildId) {
+            await this.createGuild(telegramInitData, userInfoResult.data);
+          }
           // process.exit(0);
 
           await sleep(2);
