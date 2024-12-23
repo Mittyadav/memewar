@@ -90,13 +90,13 @@ class MemesWar {
       this.session_name = userData.id;
       this.#get_user_agent();
     } catch (error) {
-      this.log(`Kiểm tra lại query_id, hoặc thay query)id mới: ${error.message}`);
+      this.log(`Check query_id again, or replace query)id mới: ${error.message}`);
     }
   }
 
   log = (msg, type = "info") => {
     const timestamp = new Date().toLocaleTimeString();
-    const logFormat = `${timestamp} | ${type.toLocaleUpperCase()}| [Tài khoản ${this.accountIndex + 1}][${this.proxyIp}] | ${msg}`;
+    const logFormat = `${timestamp} | ${type.toLocaleUpperCase()}| [Account ${this.accountIndex + 1}][${this.proxyIp}] | ${msg}`;
 
     switch (type) {
       case "success":
@@ -853,7 +853,7 @@ async function main() {
     console.log(`Proxy: ${proxies.length}`);
     process.exit(1);
   }
-  console.log("Tool được phát triển bởi nhóm tele Airdrop Hunter Siêu Tốc (https://t.me/airdrophuntersieutoc)".yellow);
+  console.log("Tool Developed by the Telegram group "SCRIPTHUB" (https://t.me/scripthub00)".yellow);
   let maxThreads = settings.MAX_THEADS;
 
   queryIds.map((val, i) => new MemesWar(val, i, proxies[i]).createUserAgent());
@@ -881,17 +881,17 @@ async function main() {
               if (message.error) {
                 errors.push(`Tài khoản ${message.accountIndex}: ${message.error}`);
               }
-              // console.log(`Tài khoản ${message.accountIndex}: ${message.error}`);
+              // console.log(`Worker error for account ${message.accountIndex}: ${message.error}`);
               resolve();
             });
             worker.on("error", (error) => {
-              errors.push(`Lỗi worker cho tài khoản ${currentIndex}: ${error.message}`);
-              // console.log(`Lỗi worker cho tài khoản ${currentIndex}: ${error.message}`);
+              errors.push(`Worker error for account ${currentIndex}: ${error.message}`);
+              // console.log(`Worker error for account${currentIndex}: ${error.message}`);
               resolve();
             });
             worker.on("exit", (code) => {
               if (code !== 0) {
-                errors.push(`Worker cho tài khoản ${currentIndex} thoát với mã: ${code}`);
+                errors.push(`Worker error for account ${currentIndex} exit with code: ${code}`);
               }
               resolve();
             });
@@ -913,8 +913,8 @@ async function main() {
     }
     const to = new MemesWar(null, 0, proxies[0]);
     await sleep(3);
-    console.log("Tool được phát triển bởi nhóm tele Airdrop Hunter Siêu Tốc (https://t.me/airdrophuntersieutoc)".yellow);
-    console.log(`=============Hoàn thành tất cả tài khoản=============`.magenta);
+    console.log("Tool Developed by the Telegram group "SCRIPTHUB" (https://t.me/scripthub00)".yellow);
+    console.log(`=============Complete all accounts=============`.magenta);
     await to.countdown(settings.TIME_SLEEP * 60);
   }
 }
