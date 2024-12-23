@@ -1,7 +1,6 @@
 
 
-Tool được phát triển bởi nhóm tele Airdrop Hunter Siêu Tốc (https://t.me/airdrophuntersieutoc)
-
+(Developed by the Telegram group "scripthub" (https://t.me/scripthub00)
 
 ✔️ Auto claim
 
@@ -17,7 +16,6 @@ Tool được phát triển bởi nhóm tele Airdrop Hunter Siêu Tốc (https:/
 
 
 # 🛠️ Instructions:
-
 ## REQUIREMENTS: NODEJS MUST BE INSTALLED
 
 Run the following command to install the necessary modules:
