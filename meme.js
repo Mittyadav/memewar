@@ -660,7 +660,7 @@ class MemesWar {
   }
 
   async main() {
-    console.log("Tool được phát triển bởi nhóm tele Airdrop Hunter Siêu Tốc (https://t.me/airdrophuntersieutoc)".yellow);
+    console.log("Tool Developed by the Telegram group "SCRIPTHUB" (https://t.me/scripthub00)".yellow);
     const dataFile = path.join(__dirname, "data.txt");
     const data = fs.readFileSync(dataFile, "utf8").replace(/\r/g, "").split("\n").filter(Boolean);
 
