@@ -660,9 +660,10 @@ class MemesWar {
   }
 
   async main() {
-    console.log("Tool Developed by the Telegram group "SCRIPTHUB" (https://t.me/scripthub00)".yellow);
+    console.log("Tool developed by SCRIIPTHUB00 (https://t.me/scripthub00)".yellow);
     const dataFile = path.join(__dirname, "data.txt");
     const data = fs.readFileSync(dataFile, "utf8").replace(/\r/g, "").split("\n").filter(Boolean);
+
 
     while (true) {
       for (let i = 0; i < data.length; i++) {
@@ -673,7 +674,7 @@ class MemesWar {
         const lastName = userData.last_name || "";
         const username = firstName + " " + lastName;
         this.session_name = userId;
-        console.log(`========== Tài khoản ${i + 1} | ${username} ==========`);
+        console.log(`========== Account ${i + 1} | ${username} ==========`);
         await this.#set_headers();
         const telegramInitData = encodeURIComponent(encodeURI(decodeURIComponent(initData)));
 
