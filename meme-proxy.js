@@ -777,7 +777,7 @@ class MemesWar {
     this.session_name = userId;
     let proxyUrl = this.proxy;
     const timesleep = getRandomNumber(settings.DELAY_START_BOT[0], settings.DELAY_START_BOT[1]);
-    console.log(`=========Tài khoản ${this.accountIndex + 1} | ${username}| Nghỉ ${timesleep} trước khi bắt đầu=============`.green);
+    console.log(`=========ACCOUNT ${this.accountIndex + 1} | ${username}| rested ${timesleep} before starting=============`.green);
     this.#set_headers();
     const telegramInitData = encodeURIComponent(encodeURI(decodeURIComponent(initData)));
     await sleep(timesleep);
@@ -853,7 +853,7 @@ async function main() {
     console.log(`Proxy: ${proxies.length}`);
     process.exit(1);
   }
-  console.log("Tool Developed by the Telegram group "SCRIPTHUB" (https://t.me/scripthub00)".yellow);
+  console.log("Tool Developed by the Telegram group SCRIPTHUB (https://t.me/scripthub00)".yellow);
   let maxThreads = settings.MAX_THEADS;
 
   queryIds.map((val, i) => new MemesWar(val, i, proxies[i]).createUserAgent());
