@@ -913,7 +913,7 @@ async function main() {
     }
     const to = new MemesWar(null, 0, proxies[0]);
     await sleep(3);
-    console.log("Tool Developed by the Telegram group "SCRIPTHUB" (https://t.me/scripthub00)".yellow);
+    console.log("Tool Developed by the Telegram group SCRIPTHUB (https://t.me/scripthub00)".yellow);
     console.log(`=============Complete all accounts=============`.magenta);
     await to.countdown(settings.TIME_SLEEP * 60);
   }
